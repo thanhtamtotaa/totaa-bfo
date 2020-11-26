@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Wildside\Userstamps\Userstamps;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Foundation\Auth\Access\Authorizable;
+use Spatie\Permission\Traits\HasRoles;
 
 class BfoInfo extends Model implements AuthorizableContract
 {
@@ -15,6 +16,7 @@ class BfoInfo extends Model implements AuthorizableContract
     use SoftDeletes;
     use Userstamps;
     use Authorizable;
+    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
