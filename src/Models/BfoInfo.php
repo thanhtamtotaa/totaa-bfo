@@ -30,7 +30,7 @@ class BfoInfo extends Model implements AuthorizableContract
      *
      * @var string
      */
-    protected $table = 'user_infos';
+    protected $table = 'bfo_infos';
 
     /**
      * The primary key associated with the table.
