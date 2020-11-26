@@ -20,7 +20,7 @@
         "illuminate/console": "^6.0|^7.0|^8.0",
         "illuminate/contracts": "^6.0|^7.0|^8.0",
         "illuminate/support": "^6.0|^7.0|^8.0",
-        "totaa/totaa-permission": "^0.0.5"
+        "totaa/totaa-permission": "^0.0.6"
     },
     "require-dev": {
         "orchestra/testbench": "^4.0",
