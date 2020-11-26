@@ -69,4 +69,10 @@ class BfoInfo extends Model implements AuthorizableContract
      * @var string
      */
     protected $guard_name = 'web';
+
+    /*Liên kết với tài khoản*/
+    public function users()
+    {
+         return $this->hasMany('App\Models\User', 'info_mnv', 'mnv');
+    }
 }
