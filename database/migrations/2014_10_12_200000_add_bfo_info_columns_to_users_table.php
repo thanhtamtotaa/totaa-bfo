@@ -18,7 +18,7 @@ class AddBfoInfoColumnsToUsersTable extends Migration
                     ->after('password')
                     ->nullable()
                     ->default(null);
-            $table->foreign('info_mnv')->references('mnv')->on('user_infos')->onDelete('SET NULL')->onUpdate('cascade');
+            $table->foreign('info_mnv')->references('mnv')->on('bfo_infos')->onDelete('SET NULL')->onUpdate('cascade');
         });
     }
 
