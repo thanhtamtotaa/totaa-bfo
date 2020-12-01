@@ -151,7 +151,7 @@ class BfoInfoLivewire extends Component
         $this->name = $this->nhanvien->name;
         $this->birthday = !!$this->nhanvien->birthday ? $this->nhanvien->birthday->format("d-m-Y") : NULL;
         $this->ngay_vao_lam = !!$this->nhanvien->ngay_vao_lam ? $this->nhanvien->ngay_vao_lam->format("d-m-Y") : NULL;
-        $this->active = $this->nhanvien->active;
+        $this->active = !!$this->nhanvien->active;
 
         $this->dispatchBrowserEvent('show_modal', "#add_edit_modal");
     }
