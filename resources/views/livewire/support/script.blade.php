@@ -10,11 +10,7 @@
         $(event.detail).modal("show");
     })
 
-    $(document).on("click", "[wire\\:click\\.prevent='save_team()']", function() {
-        ToTaa_BlockUI();
-    });
-
-    $(document).on("click", "[wire\\:click\\.prevent='save_team_member()']", function() {
+    $(document).on("click", "[totaa-click-block-ui]", function() {
         ToTaa_BlockUI();
     });
 
@@ -34,14 +30,14 @@
     })
 
     //Block UI khi ấn thêm mới
-    Livewire.on('add_team', function() {
+    Livewire.on('add_bfo_info', function() {
         ToTaa_BlockUI();
     });
 
     //Gọi view xác nhận xóa
-    $(document).on("click", "[totaa-edit-team]", function() {
+    $(document).on("click", "[totaa-edit-bfo]", function() {
         ToTaa_BlockUI();
-        Livewire.emit('edit_team', $(this).attr("totaa-edit-team"));
+        Livewire.emit('edit_bfo_info', $(this).attr("totaa-edit-bfo"));
     });
 
     //Gọi view set thành viên
@@ -66,6 +62,12 @@
                     });
                 });
             }
+
+            if ($("input.datepicker-totaa").length != 0) {
+                $("input.datepicker-totaa").each(function(e) {
+                    $(this).datepicker('update');
+                });
+            }
         });
     });
 
@@ -77,5 +79,31 @@
             });
         });
     }
+
+
+    if ($("input.datepicker-totaa").length != 0) {
+        $("input.datepicker-totaa").each(function(e) {
+            $(this)
+                .datepicker({
+                    language: "vi",
+                    autoclose: true,
+                    toggleActive: true,
+                    todayHighlight: true,
+                    todayBtn: "linked",
+                    clearBtn: true,
+                    maxViewMode: 3,
+                    minViewMode: 0,
+                    startView: $(this).attr("startview-totaa"),
+                    weekStart: 1,
+                    format: "dd-mm-yyyy",
+                    container: $(this).attr("container-totaa"),
+                    orientation: isRtl ? "auto right" : "auto left"
+                })
+                .on("hide", function(e) {
+                    @this.set($(this).attr("wire:model"), $(this).val());
+                });
+        });
+    }
+
 
 </script>
