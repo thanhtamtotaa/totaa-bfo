@@ -8,6 +8,7 @@ use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
+use Auth;
 
 class BfoInfoDataTable extends DataTable
 {
@@ -21,7 +22,42 @@ class BfoInfoDataTable extends DataTable
     {
         return datatables()
             ->eloquent($query)
-            ->addColumn('action', 'bfoinfo.action');
+            ->addColumn('action', function ($query) {
+                $Action_Icon="<div class='action-div icon-4 px-0 mx-1 d-flex justify-content-around text-center'>";
+
+                if (Auth::user()->bfo_info->can("edit-bfo")) {
+                    $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-edit-bfo='$query->mnv'><i class='text-indigo fas fa-user-edit'></i></div>";
+                }
+
+
+                $Action_Icon.="</div>";
+
+                return $Action_Icon;
+            })
+            ->editColumn('active', function ($query) {
+                if (!!$query->active) {
+                    return "Đã kích hoạt";
+                } else {
+                    return "Đã vô hiệu hóa";
+                }
+            })
+            ->editColumn('member_of_teams', function ($query) {
+                return implode(", ", $query->member_of_teams->pluck("name")->toArray());
+            })
+            ->editColumn('ngay_vao_lam', function ($query) {
+                if (!!$query->ngay_vao_lam) {
+                    return $query->ngay_vao_lam->format("d-m-Y");
+                } else {
+                    return NULL;
+                }
+            })
+            ->editColumn('birthday', function ($query) {
+                if (!!$query->birthday) {
+                    return $query->birthday->format("d-m-Y");
+                } else {
+                    return NULL;
+                }
+            });
     }
 
     /**
@@ -32,7 +68,13 @@ class BfoInfoDataTable extends DataTable
      */
     public function query(BfoInfo $model)
     {
-        return $model->newQuery();
+        $query = $model->newQuery();
+
+        if (!request()->has('order')) {
+            $query->orderBy('mnv', 'asc');
+        };
+
+        return $query->with(["member_of_teams:id,name"]);
     }
 
     /**
@@ -45,9 +87,25 @@ class BfoInfoDataTable extends DataTable
         return $this->builder()
                     ->setTableId('bfoinfo-table')
                     ->columns($this->getColumns())
-                    ->minifiedAjax()
-                    ->dom('Bfrtip')
-                    ->orderBy(1);
+                    ->dom("<'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r><'row'<'col-sm-12 table-responsive't>><'row'<'col-md-5 col-sm-12'i><'col-md-7 col-sm-12'p>>")
+                    ->parameters([
+                        "autoWidth" => false,
+                        "lengthMenu" => [
+                            [10, 25, 50, -1],
+                            [10, 25, 50, "Tất cả"]
+                        ],
+                        "order" => [],
+                        'initComplete' => 'function(settings, json) {
+                            var api = this.api();
+                            window.addEventListener("dt_draw", function(e) {
+                                api.draw(false);
+                                e.preventDefault();
+                            })
+                            api.buttons()
+                                .container()
+                                .appendTo($("#datatable-button"));
+                        }',
+                    ]);
     }
 
     /**
@@ -59,14 +117,47 @@ class BfoInfoDataTable extends DataTable
     {
         return [
             Column::computed('action')
-                  ->exportable(false)
-                  ->printable(false)
-                  ->width(60)
-                  ->addClass('text-center'),
-            Column::make('mnv'),
-            Column::make('add your columns'),
-            Column::make('created_at'),
-            Column::make('updated_at'),
+                    ->exportable(false)
+                    ->printable(false)
+                    ->width(60)
+                    ->addClass('text-center')
+                    ->title("")
+                    ->footer(""),
+            Column::make('mnv')
+                  ->title("Mã nhân viên")
+                  ->width(15)
+                  ->searchable(true)
+                  ->orderable(true)
+                  ->footer("Mã nhân viên"),
+            Column::make('full_name')
+                  ->title("Họ tên")
+                  ->width(200)
+                  ->searchable(true)
+                  ->orderable(true)
+                  ->footer("Họ tên"),
+            Column::computed('birthday')
+                  ->title("Ngày sinh")
+                  ->width(80)
+                  ->searchable(false)
+                  ->orderable(true)
+                  ->footer("Ngày sinh"),
+            Column::computed('ngay_vao_lam')
+                  ->title("Ngày vào làm")
+                  ->width(80)
+                  ->searchable(false)
+                  ->orderable(true)
+                  ->footer("Ngày vào làm"),
+            Column::computed('member_of_teams')
+                  ->title("Nhóm")
+                  ->width(150)
+                  ->searchable(false)
+                  ->orderable(false)
+                  ->footer("Nhóm"),
+            Column::computed('active')
+                  ->title("Trạng thái")
+                  ->searchable(false)
+                  ->orderable(false)
+                  ->footer("Trạng thái"),
         ];
     }
 
