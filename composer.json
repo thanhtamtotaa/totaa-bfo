@@ -27,7 +27,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Totaa\\TotaaBfo\\": "src"
+            "Totaa\\TotaaBfo\\": "src",
+            "Totaa\\TotaaBfo\\Database\\Seeders\\": "database/seeders"
         }
     },
     "autoload-dev": {
