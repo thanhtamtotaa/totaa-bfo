@@ -29,7 +29,7 @@ class BfoInfo extends Model implements AuthorizableContract
 
     /**
      * The table associated with the model.
-     *
+     * ??
      * @var string
      */
     protected $table = 'bfo_infos';
