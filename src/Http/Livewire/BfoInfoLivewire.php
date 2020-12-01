@@ -73,25 +73,7 @@ class BfoInfoLivewire extends Component
     {
         $this->bfo_info = Auth::user()->bfo_info;
         $this->created_by = $this->bfo_info->mnv;
-        $this->team_type_arrays = TeamType::where("active", true)->get();
-        $this->team_arrays = Team::where("active", true)->where("id", "<>", $this->team_id)->get();
-        //$this->bfo_info_arrays = BfoInfo::where("active", true)->select("mnv", "full_name")->get()->toArray();
-
-        $this->bfo_info_arrays = Cache::remember('bfo_info_arrays_teams', 180, function () {
-            return BfoInfo::where("active", true)->select("mnv", "full_name")->get()->toArray();
-        });
-
-        if (!!$this->team_type_id) {
-            $this->kenh_kd_arrays = optional(TeamType::find($this->team_type_id))->kenh_kds;
-        } else {
-            $this->kenh_kd_arrays = NULL;
-        }
-
-        if (!!$this->kenh_kd_id) {
-            $this->nhom_kd_arrays = optional(KenhKD::find($this->kenh_kd_id))->nhom_kds;
-        } else {
-            $this->nhom_kd_arrays = NULL;
-        }
+        $this->bfo_info_arrays = [];
     }
 
 }
