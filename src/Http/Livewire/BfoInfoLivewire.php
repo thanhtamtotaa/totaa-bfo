@@ -5,6 +5,7 @@ namespace Totaa\TotaaBfo\Http\Livewire;
 use Livewire\Component;
 use Auth;
 use Illuminate\Support\Facades\Cache;
+use Totaa\TotaaBfo\Models\BfoInfo;
 
 class BfoInfoLivewire extends Component
 {
@@ -13,8 +14,8 @@ class BfoInfoLivewire extends Component
      *
      * @var mixed
      */
-    public $team_id, $team, $name, $team_type_id, $main_team_id, $kenh_kd_id, $nhom_kd_id, $order, $active, $created_by, $quanlys, $members;
-    public $bfo_info, $modal_title, $toastr_message, $team_type_arrays, $bfo_info_arrays, $kenh_kd_arrays, $nhom_kd_arrays, $team_arrays;
+    public $nhanvien, $mnv, $full_name, $name, $birthday, $ngay_vao_lam, $active;
+    public $bfo_info, $modal_title, $toastr_message;
 
     /**
      * Cho phép cập nhật updateMode
@@ -29,7 +30,7 @@ class BfoInfoLivewire extends Component
      *
      * @var array
      */
-    protected $listeners = ['add_team', 'edit_team', 'set_team_member', ];
+    protected $listeners = ['add_bfo_info', 'view_bfo_info', 'edit_bfo_info', 'delete_bfo_info', 'set_bfo_info_team', ];
 
     /**
      * Validation rules
@@ -38,19 +39,11 @@ class BfoInfoLivewire extends Component
      */
     protected function rules() {
         return [
-            'team_id' => 'nullable|exists:teams,id',
+            'full_name' => 'required',
             'name' => 'required',
-            'team_type_id' => 'required|exists:team_types,id',
-            'main_team_id' => 'nullable|exists:teams,id',
-            'kenh_kd_id' => 'nullable|exists:kenh_kinhdoanhs,id',
-            'nhom_kd_id' => 'nullable|exists:nhom_kinhdoanhs,id',
-            'order' => 'nullable|numeric',
+            'birthday' => 'nullable|date_format:d-m-Y',
+            'ngay_vao_lam' => 'nullable|date_format:d-m-Y',
             'active' => 'nullable|boolean',
-            'created_by' => 'required|exists:bfo_infos,mnv',
-            'quanlys' => 'nullable|array',
-            'quanlys.*' => 'nullable|exists:bfo_infos,mnv',
-            'members' => 'nullable|array',
-            'members.*' => 'nullable|exists:bfo_infos,mnv',
         ];
     }
 
@@ -73,7 +66,142 @@ class BfoInfoLivewire extends Component
     {
         $this->bfo_info = Auth::user()->bfo_info;
         $this->created_by = $this->bfo_info->mnv;
-        $this->bfo_info_arrays = [];
     }
 
+    /**
+     * On updated action
+     *
+     * @param  mixed $propertyName
+     * @return void
+     */
+    public function updated($propertyName)
+    {
+        $this->validateOnly($propertyName);
+    }
+
+    public function updatedFullName()
+    {
+        $this->full_name = mb_convert_case(trim($this->full_name), MB_CASE_TITLE, "UTF-8");
+        $names = explode(' ', $this->full_name);
+        $this->name = array_pop($names);
+    }
+
+    public function updatedMnv()
+    {
+        if ((!!$this->nhanvien && $this->nhanvien->mnv != $this->mnv) || !!!$this->nhanvien) {
+            $this->validate([
+                'mnv' => 'required|unique:bfo_infos,mnv',
+            ]);
+        }
+    }
+
+    /**
+     * cancel
+     *
+     * @return void
+     */
+    public function cancel()
+    {
+        $this->updateMode = false;
+        $this->editStatus = false;
+        $this->resetValidation();
+        $this->reset();
+        $this->mount();
+        $this->dispatchBrowserEvent('hide_modal');
+    }
+
+    /**
+     * add_bfo_info method
+     *
+     * @return void
+     */
+    public function add_bfo_info()
+    {
+        if ($this->bfo_info->cannot("add-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        $this->modal_title = "Thêm nhân viên mới";
+        $this->toastr_message = "Thêm nhân viên thành công";
+        $this->active = true;
+        $this->dispatchBrowserEvent('show_modal', "#add_edit_modal");
+    }
+
+    /**
+     * edit_bfo_info method
+     *
+     * @return void
+     */
+    public function edit_bfo_info($mnv)
+    {
+        if ($this->bfo_info->cannot("edit-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        $this->modal_title = "Chỉnh sửa nhân viên";
+        $this->toastr_message = "Chỉnh sửa nhân viên thành công";
+        $this->editStatus = true;
+        $this->updateMode = true;
+
+        $this->mnv = $mnv;
+        $this->nhanvien = BfoInfo::find($this->mnv);
+        $this->full_name = $this->nhanvien->full_name;
+        $this->name = $this->nhanvien->name;
+        $this->birthday = !!$this->nhanvien->birthday ? $this->nhanvien->birthday->format("d-m-Y") : NULL;
+        $this->ngay_vao_lam = !!$this->nhanvien->ngay_vao_lam ? $this->nhanvien->ngay_vao_lam->format("d-m-Y") : NULL;
+        $this->active = $this->nhanvien->active;
+
+        $this->dispatchBrowserEvent('show_modal', "#add_edit_modal");
+    }
+
+    /**
+     * save_bfo_info
+     *
+     * @return void
+     */
+    public function save_bfo_info()
+    {
+        if ($this->bfo_info->cannot("add-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        if ((!!$this->nhanvien && $this->nhanvien->mnv != $this->mnv) || !!!$this->nhanvien) {
+            $this->validate([
+                'mnv' => 'required|unique:bfo_infos,mnv',
+            ]);
+        }
+
+       $validateData = $this->validate();
+
+       $validateData["mnv"] = $this->mnv;
+
+       if (!!!$validateData["birthday"]) {
+        $validateData["birthday"] = NULL;
+       }
+
+       if (!!!$validateData["ngay_vao_lam"]) {
+        $validateData["ngay_vao_lam"] = NULL;
+       }
+
+       try {
+            if (!!$this->nhanvien) {
+                $this->nhanvien->update($validateData);
+            } else {
+                BfoInfo::create($validateData);
+            }
+        } catch (\Exception $e) {
+            dd($e);
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => implode(" - ", $e->errorInfo)]);
+            return null;
+        }
+
+        //Đầy thông tin về trình duyệt
+        $this->dispatchBrowserEvent('dt_draw');
+        $toastr_message = $this->toastr_message;
+        $this->cancel();
+        $this->dispatchBrowserEvent('toastr', ['type' => 'success', 'title' => "Thành công", 'message' => $toastr_message]);
+    }
 }
