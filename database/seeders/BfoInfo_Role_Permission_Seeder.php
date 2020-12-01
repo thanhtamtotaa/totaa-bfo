@@ -42,7 +42,7 @@ class BfoInfo_Role_Permission_Seeder extends Seeder
         if (Role::where("name", "super-admin")->count() == 0) {
             $super_admin =  Role::create(['name' => 'super-admin', "description" => "Super Admin", "group" => "Admin", "order" => 1, "lock" => true,]);
         } else {
-            $super_admin= Role::where("name", "super-admin")->first();
+            $super_admin = Role::where("name", "super-admin")->first();
         }
 
         if (Role::where("name", "admin")->count() == 0) {
@@ -52,13 +52,13 @@ class BfoInfo_Role_Permission_Seeder extends Seeder
         }
 
         if (Role::where("name", "admin-bfo")->count() == 0) {
-            $admin_team = Role::create(['name' => 'admin-bfo', "description" => "Admin Quản lý Thông tin BFO", "group" => "Admin", "order" => 2, "lock" => true,]);
+            $admin_bfo = Role::create(['name' => 'admin-bfo', "description" => "Admin Quản lý Thông tin BFO", "group" => "Admin", "order" => 2, "lock" => true,]);
         } else {
-            $admin_team = Role::where("name", "admin-bfo")->first();
+            $admin_bfo = Role::where("name", "admin-bfo")->first();
         }
 
         $super_admin->givePermissionTo($permission);
         $admin->givePermissionTo($permission);
-        $admin_team->givePermissionTo($permission);
+        $admin_bfo->givePermissionTo($permission);
     }
 }
