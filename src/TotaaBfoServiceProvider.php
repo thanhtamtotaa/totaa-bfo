@@ -3,7 +3,7 @@
 namespace Totaa\TotaaBfo;
 
 use Illuminate\Support\ServiceProvider;
-use Totaa\TotaaBfo\Http\Livewire\TeamLivewire;
+use Totaa\TotaaBfo\Http\Livewire\BfoInfoLivewire;
 use Livewire\Livewire;
 
 class TotaaBfoServiceProvider extends ServiceProvider
