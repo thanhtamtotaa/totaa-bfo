@@ -9,6 +9,7 @@ use Wildside\Userstamps\Userstamps;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Spatie\Permission\Traits\HasRoles;
+use Totaa\TotaaTeam\Traits\BfoHasTeamTraits;
 
 class BfoInfo extends Model implements AuthorizableContract
 {
@@ -17,6 +18,7 @@ class BfoInfo extends Model implements AuthorizableContract
     use Userstamps;
     use Authorizable;
     use HasRoles;
+    use BfoHasTeamTraits;
 
     /**
      * The attributes that are mass assignable.
