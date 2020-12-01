@@ -3,6 +3,8 @@
 namespace Totaa\TotaaBfo;
 
 use Illuminate\Support\ServiceProvider;
+use Totaa\TotaaBfo\Http\Livewire\TeamLivewire;
+use Livewire\Livewire;
 
 class TotaaBfoServiceProvider extends ServiceProvider
 {
@@ -15,9 +17,9 @@ class TotaaBfoServiceProvider extends ServiceProvider
          * Optional methods to load your package assets
          */
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'totaa-bfo');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'totaa-bfo');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'totaa-bfo');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
 
         if ($this->app->runningInConsole()) {
             /*$this->publishes([
@@ -41,6 +43,13 @@ class TotaaBfoServiceProvider extends ServiceProvider
 
             // Registering package commands.
             // $this->commands([]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Seed Service Provider need on boot() method
+            |--------------------------------------------------------------------------
+            */
+            $this->app->register(SeedServiceProvider::class);
         }
     }
 
@@ -56,5 +65,9 @@ class TotaaBfoServiceProvider extends ServiceProvider
         $this->app->singleton('totaa-bfo', function () {
             return new TotaaBfo;
         });
+
+        if (class_exists(Livewire::class)) {
+            Livewire::component('totaa-bfo::bfo-livewire', BfoInfoLivewire::class);
+        }
     }
 }
