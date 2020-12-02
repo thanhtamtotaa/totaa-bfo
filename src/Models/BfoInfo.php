@@ -10,6 +10,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Spatie\Permission\Traits\HasRoles;
 use Totaa\TotaaTeam\Traits\BfoHasTeamTraits;
+use Totaa\TotaaTeam\Traits\BfoHasTeamTraits2;
 
 class BfoInfo extends Model implements AuthorizableContract
 {
@@ -19,6 +20,15 @@ class BfoInfo extends Model implements AuthorizableContract
     use Authorizable;
     use HasRoles;
     use BfoHasTeamTraits;
+
+    public function __construct () {
+
+        dd(class_exists(BfoHasTeamTraits::class), class_exists(BfoHasTeamTraits2::class));
+
+        if (true) {
+
+        }
+    }
 
     /**
      * The attributes that are mass assignable.
