@@ -34,10 +34,10 @@
         ToTaa_BlockUI();
     });
 
-    //Gọi view xác nhận xóa
-    $(document).on("click", "[totaa-edit-bfo]", function() {
+    //Gọi view set team
+    $(document).on("click", "[totaa-set-bfo-team]", function() {
         ToTaa_BlockUI();
-        Livewire.emit('edit_bfo_info', $(this).attr("totaa-edit-bfo"));
+        Livewire.emit('set_bfo_info_team', $(this).attr("totaa-set-bfo-team"));
     });
 
     //Gọi view set thành viên
