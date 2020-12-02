@@ -6,6 +6,7 @@ use Livewire\Component;
 use Auth;
 use Illuminate\Support\Facades\Cache;
 use Totaa\TotaaBfo\Models\BfoInfo;
+use Totaa\TotaaTeam\Models\Team;
 
 class BfoInfoLivewire extends Component
 {
@@ -15,7 +16,7 @@ class BfoInfoLivewire extends Component
      * @var mixed
      */
     public $nhanvien, $mnv, $full_name, $name, $birthday, $ngay_vao_lam, $active;
-    public $bfo_info, $modal_title, $toastr_message;
+    public $bfo_info, $modal_title, $toastr_message, $team_arrays = [], $teams;
 
     /**
      * Cho phép cập nhật updateMode
@@ -44,6 +45,7 @@ class BfoInfoLivewire extends Component
             'birthday' => 'nullable|date_format:d-m-Y',
             'ngay_vao_lam' => 'nullable|date_format:d-m-Y',
             'active' => 'nullable|boolean',
+            'teams' => 'nullable|exists:teams,id',
         ];
     }
 
@@ -193,7 +195,64 @@ class BfoInfoLivewire extends Component
                 BfoInfo::create($validateData);
             }
         } catch (\Exception $e) {
-            dd($e);
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => implode(" - ", $e->errorInfo)]);
+            return null;
+        }
+
+        //Đầy thông tin về trình duyệt
+        $this->dispatchBrowserEvent('dt_draw');
+        $toastr_message = $this->toastr_message;
+        $this->cancel();
+        $this->dispatchBrowserEvent('toastr', ['type' => 'success', 'title' => "Thành công", 'message' => $toastr_message]);
+    }
+
+    /**
+     * set_bfo_info_team method
+     *
+     * @return void
+     */
+    public function set_bfo_info_team($mnv)
+    {
+        if ($this->bfo_info->cannot("edit-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        $this->modal_title = "Set nhóm cho nhân viên";
+        $this->toastr_message = "Set nhóm cho nhân viên thành công";
+        $this->editStatus = true;
+        $this->updateMode = true;
+
+        $this->mnv = $mnv;
+        $this->nhanvien = BfoInfo::find($this->mnv);
+        $this->full_name = $this->nhanvien->full_name;
+        $this->teams = $this->nhanvien->member_of_teams->pluck("id");
+
+        $this->team_arrays = Team::where("active", true)->orderBy("order")->orderBy("id")->select("id", "name")->get()->toArray();
+
+        $this->dispatchBrowserEvent('show_modal', "#set_bfo_team_modal");
+    }
+
+    /**
+     * save_bfo_info_team
+     *
+     * @return void
+     */
+    public function save_bfo_info_team()
+    {
+        if ($this->bfo_info->cannot("edit-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        $this->validate([
+            'teams' => 'nullable|array',
+            'teams.*' => 'nullable|exists:teams,id',
+        ]);
+
+        try {
+            $this->nhanvien->member_of_teams()->sync($this->teams);
+        } catch (\Exception $e) {
             $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => implode(" - ", $e->errorInfo)]);
             return null;
         }
