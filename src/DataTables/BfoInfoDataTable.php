@@ -9,6 +9,7 @@ use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 use Auth;
+use Totaa\TotaaTeam\Traits\BfoHasTeamTraits;
 
 class BfoInfoDataTable extends DataTable
 {
@@ -29,6 +30,9 @@ class BfoInfoDataTable extends DataTable
                     $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-edit-bfo='$query->mnv'><i class='text-indigo fas fa-user-edit'></i></div>";
                 }
 
+                if ((trait_exists(BfoHasTeamTraits::class)) && (Auth::user()->bfo_info->can("edit-bfo"))) {
+                    $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-set-bfo-team='$query->mnv'><i class='text-success fas fa-users'></i></div>";
+                }
 
                 $Action_Icon.="</div>";
 
