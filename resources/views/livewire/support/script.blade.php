@@ -34,6 +34,12 @@
         ToTaa_BlockUI();
     });
 
+    //Gọi view sửa thông tin
+    $(document).on("click", "[totaa-edit-bfo]", function() {
+        ToTaa_BlockUI();
+        Livewire.emit('edit_bfo_info', $(this).attr("totaa-edit-bfo"));
+    });
+
     //Gọi view set team
     $(document).on("click", "[totaa-set-bfo-team]", function() {
         ToTaa_BlockUI();
@@ -41,9 +47,9 @@
     });
 
     //Gọi view set thành viên
-    $(document).on("click", "[totaa-set-team-member]", function() {
+    $(document).on("click", "[totaa-set-bfo-role]", function() {
         ToTaa_BlockUI();
-        Livewire.emit('set_team_member', $(this).attr("totaa-set-team-member"));
+        Livewire.emit('set_bfo_info_role', $(this).attr("totaa-set-bfo-role"));
     });
 
     //Xử lý khi dữ liệu đã được load xong
@@ -74,7 +80,6 @@
     if ($("select.select2-totaa").length != 0) {
         $("select.select2-totaa").each(function(e) {
             $(this).on('select2:close', function (e) {
-                console.log($(this).val());
                 @this.set($(this).attr("wire:model"), $(this).val());
             });
         });
