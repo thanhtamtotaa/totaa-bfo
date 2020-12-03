@@ -52,7 +52,7 @@ class BfoInfo_Role_Permission_Seeder extends Seeder
         }
 
         if (Role::where("name", "admin-bfo")->count() == 0) {
-            $admin_bfo = Role::create(['name' => 'admin-bfo', "description" => "Admin Quản lý Thông tin BFO", "group" => "Admin", "order" => 2, "lock" => true,]);
+            $admin_bfo = Role::create(['name' => 'admin-bfo', "description" => "Admin Quản lý BFO", "group" => "Admin", "order" => 2, "lock" => true,]);
         } else {
             $admin_bfo = Role::where("name", "admin-bfo")->first();
         }
