@@ -7,6 +7,10 @@ use Auth;
 use Illuminate\Support\Facades\Cache;
 use Totaa\TotaaBfo\Models\BfoInfo;
 use Totaa\TotaaTeam\Models\Team;
+use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Totaa\TotaaTeam\Traits\BfoHasTeamTraits;
 
 class BfoInfoLivewire extends Component
 {
@@ -17,6 +21,7 @@ class BfoInfoLivewire extends Component
      */
     public $nhanvien, $mnv, $full_name, $name, $birthday, $ngay_vao_lam, $active;
     public $bfo_info, $modal_title, $toastr_message, $team_arrays = [], $teams;
+    public $permissions, $roles, $role_arrays = [], $permission_arrays = [];
 
     /**
      * Cho phép cập nhật updateMode
@@ -31,7 +36,7 @@ class BfoInfoLivewire extends Component
      *
      * @var array
      */
-    protected $listeners = ['add_bfo_info', 'view_bfo_info', 'edit_bfo_info', 'delete_bfo_info', 'set_bfo_info_team', ];
+    protected $listeners = ['add_bfo_info', 'view_bfo_info', 'edit_bfo_info', 'delete_bfo_info', 'set_bfo_info_team', 'set_bfo_info_role', ];
 
     /**
      * Validation rules
@@ -190,7 +195,26 @@ class BfoInfoLivewire extends Component
 
        try {
             if (!!$this->nhanvien) {
+                $old_nhanvien = $this->nhanvien;
+                $old_mnv = $old_nhanvien->mnv;
+                $old_permissions = $old_nhanvien->permissions;
+                $old_roles = $old_nhanvien->roles;
+
+                if (trait_exists(HasRoles::class)) {
+                    if ($old_mnv != $this->mnv) {
+                        $this->nhanvien->syncPermissions(null);
+                        $this->nhanvien->syncRoles(null);
+                    }
+                }
+
                 $this->nhanvien->update($validateData);
+
+                if (trait_exists(HasRoles::class)) {
+                    if ($old_mnv != $this->mnv) {
+                        $this->nhanvien->syncPermissions($old_permissions);
+                        $this->nhanvien->syncRoles($old_roles);
+                    }
+                }
             } else {
                 BfoInfo::create($validateData);
             }
@@ -220,15 +244,16 @@ class BfoInfoLivewire extends Component
 
         $this->modal_title = "Set nhóm cho nhân viên";
         $this->toastr_message = "Set nhóm cho nhân viên thành công";
-        $this->editStatus = true;
         $this->updateMode = true;
 
         $this->mnv = $mnv;
         $this->nhanvien = BfoInfo::find($this->mnv);
         $this->full_name = $this->nhanvien->full_name;
-        $this->teams = $this->nhanvien->member_of_teams->pluck("id");
 
-        $this->team_arrays = Team::where("active", true)->orderBy("order")->orderBy("id")->select("id", "name")->get()->toArray();
+        if (trait_exists(BfoHasTeamTraits::class)) {
+            $this->teams = $this->nhanvien->member_of_teams->pluck("id")->toArray();
+            $this->team_arrays = Team::where("active", true)->orderBy("order")->orderBy("id")->select("id", "name")->get()->toArray();
+        }
 
         $this->dispatchBrowserEvent('show_modal', "#set_bfo_team_modal");
     }
@@ -263,4 +288,63 @@ class BfoInfoLivewire extends Component
         $this->cancel();
         $this->dispatchBrowserEvent('toastr', ['type' => 'success', 'title' => "Thành công", 'message' => $toastr_message]);
     }
+
+    /**
+     * set_bfo_info_role method
+     *
+     * @return void
+     */
+    public function set_bfo_info_role($mnv)
+    {
+        if ($this->bfo_info->cannot("edit-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        $this->modal_title = "Set quyền cho nhân viên";
+        $this->toastr_message = "Set quyền cho nhân viên thành công";
+        $this->updateMode = true;
+
+        $this->mnv = $mnv;
+        $this->nhanvien = BfoInfo::find($this->mnv);
+        $this->full_name = $this->nhanvien->full_name;
+        $this->ngay_vao_lam = $this->nhanvien->ngay_vao_lam;
+
+        if (trait_exists(HasRoles::class)) {
+            $this->permissions = $this->nhanvien->permissions()->pluck("name", "id")->toArray();
+            $this->roles = $this->nhanvien->roles()->pluck("name", "id")->toArray();
+            $this->permission_arrays = Permission::all()->groupBy("group")->toArray();
+            $this->role_arrays = Role::all()->groupBy("group")->toArray();
+        }
+
+        $this->dispatchBrowserEvent('show_modal', "#set_bfo_info_modal");
+    }
+
+    /**
+     * save_bfo_info_role
+     *
+     * @return void
+     */
+    public function save_bfo_info_role()
+    {
+        if ($this->bfo_info->cannot("edit-bfo")) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => "Bạn không có quyền thực hiện hành động này"]);
+            return null;
+        }
+
+        try {
+            $this->nhanvien->syncPermissions($this->permissions);
+            $this->nhanvien->syncRoles($this->roles);
+        } catch (\Exception $e) {
+            $this->dispatchBrowserEvent('toastr', ['type' => 'warning', 'title' => "Thất bại", 'message' => implode(" - ", $e->errorInfo)]);
+            return null;
+        }
+
+        //Đầy thông tin về trình duyệt
+        $this->dispatchBrowserEvent('dt_draw');
+        $toastr_message = $this->toastr_message;
+        $this->cancel();
+        $this->dispatchBrowserEvent('toastr', ['type' => 'success', 'title' => "Thành công", 'message' => $toastr_message]);
+    }
+
 }
