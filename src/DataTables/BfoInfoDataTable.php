@@ -10,6 +10,7 @@ use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 use Auth;
 use Totaa\TotaaTeam\Traits\BfoHasTeamTraits;
+use Spatie\Permission\Traits\HasRoles;
 
 class BfoInfoDataTable extends DataTable
 {
@@ -27,11 +28,15 @@ class BfoInfoDataTable extends DataTable
                 $Action_Icon="<div class='action-div icon-4 px-0 mx-1 d-flex justify-content-around text-center'>";
 
                 if (Auth::user()->bfo_info->can("edit-bfo")) {
-                    $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-edit-bfo='$query->mnv'><i class='text-indigo fas fa-user-edit'></i></div>";
+                    $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-edit-bfo='$query->mnv'><i class='text-twitter fas fa-user-edit'></i></div>";
                 }
 
                 if ((trait_exists(BfoHasTeamTraits::class)) && (Auth::user()->bfo_info->can("edit-bfo"))) {
                     $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-set-bfo-team='$query->mnv'><i class='text-success fas fa-users'></i></div>";
+                }
+
+                if ((trait_exists(HasRoles::class)) && (Auth::user()->bfo_info->can("edit-bfo"))) {
+                    $Action_Icon.="<div class='col action-icon-w-50 action-icon' totaa-set-bfo-role='$query->mnv'><i class='text-indigo fas fa-cogs'></i></div>";
                 }
 
                 $Action_Icon.="</div>";
