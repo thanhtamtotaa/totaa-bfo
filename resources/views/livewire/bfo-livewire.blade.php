@@ -5,6 +5,7 @@
     <!-- Incluce các modal -->
     @include('totaa-bfo::livewire.modal.add_edit_modal')
     @include('totaa-bfo::livewire.modal.set_bfo_team_modal')
+    @include('totaa-bfo::livewire.modal.set_bfo_info_modal')
 
     <!-- Scripts -->
     @push('livewires')
