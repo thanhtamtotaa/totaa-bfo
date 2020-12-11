@@ -2,7 +2,7 @@
 
     //Ẩn toàn bộ modal
     window.addEventListener('hide_modal', function(e) {
-        $(".modal.fade[style='display: block;']").modal("hide");
+        $(".modal.fade").modal("hide");
     })
 
     //Hiện modal cụ thể
